@@ -4,6 +4,8 @@ function App() {
 
   // State variables
   const[paper, setPaper] = useState(null); // Stores the current paper object
+  const[likedIds, setLikedIds] = useState([]);
+  const[dislikedIds, setDislikedIds] = useState([]);
   const[loading, setLoading] = useState(true); // Is the app currently fetching data?
   const[error, setError] = useState(""); // Stores error messages to display
 
