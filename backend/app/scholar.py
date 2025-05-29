@@ -38,10 +38,9 @@ class SemanticScholarClient:
         # Temporary delay to throttle API request
         time.sleep(3)
 
-        url = f"{self.base_url}/paper/{paper_id}/recommended"
+        url = f"https://api.semanticscholar.org/recommendations/v1/papers/forpaper/{paper_id}"
         params = {"limit":limit,
-                  "fields":"title,abstract,url,paperId"
-                 }
+                  "fields": "title,abstract,url,paperId"}
         try:
             response = requests.get(url, params=params)
 
@@ -54,8 +53,8 @@ class SemanticScholarClient:
             response.raise_for_status()
             data = response.json()
 
-            if data.get("data"):
-                return data["data"][0]
+            if data.get("recommendedPapers"):
+                return data["recommendedPapers"][0]
             else:
                 return {"error": "No papers found."}
 

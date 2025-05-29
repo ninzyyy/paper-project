@@ -15,7 +15,7 @@ app.add_middleware(
     )
 
 @app.get("/feed")
-def fetch_paper(query:str="Small Cell Lung Cancer"):
+def fetch_paper(query:str="Asymptomatic infection of COVID-19"):
     return SemanticScholar.search_paper(query)
 
 
