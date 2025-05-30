@@ -122,7 +122,7 @@ function App() {
         </div>
       )}
 
-      {showHistory && (
+      {!loading && showHistory && (
       <div style={{ marginTop: "2rem", background: "#f9f9f9", padding: "1rem", borderRadius: "8px" }}>
         <h3>Liked Paper IDs</h3>
         <ul>
