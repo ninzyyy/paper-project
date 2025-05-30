@@ -34,41 +34,65 @@ function App() {
       });
   }
 
-  // Function to fetch the next recommended paper based on the current paper ID
-  function loadNextPaper() {
+  // Function to fetch a personalized paper from Semantic Scholar
+  async function fetchNextPaper() {
+    setLoading(true);
+    setError("");
 
-    if (!paper?.paperId) return; // Guard clause to ensure valid paper ID
+    const body = {
+      positivePaperIds: likedIds,
+      negativePaperIds: dislikedIds,
+    };
 
-    setLoading(true); // Display loading indicator
-    fetch(`http://127.0.0.1:8000/recommendations?paperId=${paper.paperId}`) // GET request with query parameter
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.error) {
-          setError(data.error);
-        } else {
-          setPaper(data);
-        }
-        setLoading(false);
-      })
-      .catch((err) => {
-        // Catch network-level errors
-        setError("Network error: " + err.message);
-        setLoading(false);
+    try {
+      const response = await fetch("http://127.0.0.1:8000/smart-next", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
       });
+
+      const data = await response.json();
+      console.log("Smart-next response:", data);
+
+      if (data?.title && data?.paperId) {
+        setPaper(data);
+      } else {
+        console.warn("Falling back to /feed");
+        const fallbackRes = await fetch("http://127.0.0.1:8000/feed");
+        const fallbackData = await fallbackRes.json();
+        setPaper(fallbackData);
+      }
+    } catch (err) {
+      setError("Network error: " + err.message);
+    }
+
+    setLoading(false);
+  }
+
+  function handleNext() {
+    fetchNextPaper();
+  }
+
+  function handleLike() {
+    if (!paper?.paperId) return;
+    setLikedIds(prev => [...prev, paper.paperId]);
+    fetchNextPaper();
+  }
+
+  function handleDislike() {
+    if (!paper?.paperId) return;
+    setDislikedIds(prev => [...prev, paper.paperId]);
+    fetchNextPaper();
   }
 
   return (
     <div>
-      <h1>Paper Feed (Manual Mode)</h1>
+      <h1>Paper Feed</h1>
 
-      {/* Show loading message while fetching */}
       {loading && <p>Loading...</p>}
-
-      {/* Show any error in red */}
       {error && <p style={{ color: 'red' }}>{error}</p>}
 
-      {/* Show paper content once available and there's no error */}
-      {paper && !error && (
+      {!loading && paper && !error && (
         <div style={{
           maxWidth: "600px",
           margin: "2rem auto",
@@ -77,30 +101,22 @@ function App() {
           boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
           backgroundColor: "#ffffff"
         }}>
-          <h2 style={{ marginBottom: "1rem", fontSize: "1.5rem" }}>
-            {paper.title}
-          </h2>
-
+          <h2 style={{ marginBottom: "1rem", fontSize: "1.5rem" }}>{paper.title}</h2>
           <p style={{ lineHeight: 1.6, fontSize: "1rem" }}>
             {paper.abstract || "No abstract available."}
           </p>
 
-          {/* Link to original paper */}
           <div style={{ marginTop: "1rem" }}>
-            <a
-              href={paper.url}
-              target="_blank"
-              rel="noreferrer"
-              style={{ color: "#007bff" }}
-            >
+            <a href={paper.url} target="_blank" rel="noreferrer" style={{ color: "#007bff" }}>
               🔗 View Source
             </a>
           </div>
 
-          {/* Button to get the next recommendation */}
-          <button onClick={loadNextPaper} style={{ marginTop: "1rem" }}>
-            ▶️ Next
-          </button>
+          <div style={{ marginTop: "1rem", display: "flex", gap: "1rem" }}>
+            <button onClick={handleDislike}>👎 Dislike</button>
+            <button onClick={handleLike}>👍 Like</button>
+            <button onClick={handleNext}>⏭️ Next</button>
+          </div>
         </div>
       )}
     </div>

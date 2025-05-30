@@ -1,6 +1,7 @@
-from fastapi  import FastAPI
+from fastapi  import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from app.scholar import SemanticScholarClient
+
 
 app = FastAPI()
 SemanticScholar = SemanticScholarClient()
@@ -14,11 +15,24 @@ app.add_middleware(
     allow_headers=["*"],
     )
 
+
 @app.get("/feed")
-def fetch_paper(query:str="Asymptomatic infection of COVID-19"):
-    return SemanticScholar.search_paper(query)
+def fetch_paper():
+    return SemanticScholar.get_fallback_paper()
 
 
-@app.get("/recommendations")
-def fetch_recommendation(paperId:str):
-    return SemanticScholar.get_recommended_paper(paper_id=paperId)
+@app.post("/smart-next")
+async def smart_next(request: Request):
+    payload = await request.json()
+    positive_ids = payload.get("positivePaperIds", [])
+    negative_ids = payload.get("negativePaperIds", [])
+
+    rec = SemanticScholar.get_recommended_paper_from_list(
+        positive_ids=positive_ids,
+        negative_ids=negative_ids
+    )
+
+    if "error" not in rec:
+        return rec
+
+    return SemanticScholar.get_fallback_paper()
