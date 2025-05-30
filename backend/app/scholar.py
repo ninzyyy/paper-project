@@ -77,6 +77,11 @@ class SemanticScholarClient:
             self.fallback_cache = self.search_paper(query=self.default_query, limit=20)
             self.fallback_index = 0
 
+        if self.fallback_index >= len(self.fallback_cache):
+            print("Fallback cache exhausted. Refetching...")
+            self.fallback_cache = self.search_paper(query=self.default_query, limit=20)
+            self.fallback_index = 0
+
         paper = self.fallback_cache[self.fallback_index]
         self.fallback_index += 1
         return paper
