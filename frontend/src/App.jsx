@@ -8,6 +8,7 @@ function App() {
   const[dislikedIds, setDislikedIds] = useState([]);
   const[loading, setLoading] = useState(true); // Is the app currently fetching data?
   const[error, setError] = useState(""); // Stores error messages to display
+  const[showHistory, setShowHistory] = useState(false); //History of the liked/disliked papers
 
   // Initial mounting of the app
   useEffect(() => {
@@ -116,9 +117,24 @@ function App() {
             <button onClick={handleDislike}>👎 Dislike</button>
             <button onClick={handleLike}>👍 Like</button>
             <button onClick={handleNext}>⏭️ Next</button>
+            <button onClick={() => setShowHistory(prev => !prev)}>📋 {showHistory ? "Hide" : "Show"} Liked/Disliked </button>
           </div>
         </div>
       )}
+
+      {showHistory && (
+      <div style={{ marginTop: "2rem", background: "#f9f9f9", padding: "1rem", borderRadius: "8px" }}>
+        <h3>Liked Paper IDs</h3>
+        <ul>
+          {likedIds.map(id => <li key={`like-${id}`}>{id}</li>)}
+        </ul>
+        <h3>Disliked Paper IDs</h3>
+        <ul>
+          {dislikedIds.map(id => <li key={`dislike-${id}`}>{id}</li>)}
+        </ul>
+      </div>
+    )}
+
     </div>
   );
 }
