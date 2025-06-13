@@ -1,61 +1,101 @@
+import os
 import requests
 import time, datetime
+from dotenv import load_dotenv
+
+load_dotenv()
+S2_API_KEY = os.getenv('S2_API_KEY')
 
 class SemanticScholarClient:
 
-    def __init__(self, base_url:str="https://api.semanticscholar.org/graph/v1"):
-        self.base_url = base_url
+
+    def __init__(self):
+
+        if not S2_API_KEY:
+            raise RuntimeError("❌ Semantic Scholar API key is not set in the environment.")
+
+        self.api_key = S2_API_KEY
+        self.default_query = "Asymptomatic infection of COVID-19"
         self.fallback_cache = []
         self.fallback_index = 0
-        self.default_query = "Asymptomatic infection of COVID-19"
+        self.fallback_page = 0
+        self.seen_ids = set()
+        self.last_call_time = None
 
-    def search_paper(self, query:str, limit:int=1):
 
-        # Temporary delay to throttle API request
-        time.sleep(3)
-        print("Calling Semantic Scholar at", datetime.datetime.now().isoformat())
+    def _throttle(self):
+        if self.last_call_time:
+            elapsed = time.time() - self.last_call_time
+            if elapsed < 1.0:
+                time.sleep(1.0 - elapsed)
+        self.last_call_time = time.time()
+
+
+    def search_paper(self, query:str, limit:int=1, offset:int=0):
+
+        self._throttle()
+        print("📡 Calling Semantic Scholar at", datetime.datetime.now().isoformat())
 
         if not query:
             query = self.default_query
 
-        url = f"{self.base_url}/paper/search"
+        url = "https://api.semanticscholar.org/graph/v1/paper/search"
+        headers = {'x-api-key': self.api_key}
         params = {"query":query,
                   "limit":limit,
+                  "offset": offset,
                   "fields":"title,abstract,url,paperId"
                  }
-        try:
-            response = requests.get(url, params=params)
 
+        try:
+            response = requests.get(url, headers=headers, params=params)
             if response.status_code == 429:
+                print("⚠️ scholar.py: Rate limit exceeded")
                 return {"error": "Rate limit exceeded. Please wait and try again shortly."}
 
             response.raise_for_status()
             data = response.json()
 
-            return data["data"] if limit > 1 else (data["data"][0] if data.get("data") else {"error": "No papers found."})
+            if limit > 1:
+                return data["data"]
+            else:
+                if data.get("data"):
+                    return data["data"][0]
+                else:
+                    return {"error": "No papers found."}
 
         except requests.RequestException as e:
+            print(f"❌ Request failed: {e}")
+            if hasattr(e, 'response') and e.response is not None:
+                print(f"📥 Response content: {e.response.status_code} - {e.response.text}")
             return {"error": f"Request failed: {str(e)}"}
 
 
     def get_recommended_paper_from_list(self, positive_ids, negative_ids, limit=1):
 
-        # Temporary delay to throttle API request
-        time.sleep(3)
-        print("Calling Semantic Scholar at", datetime.datetime.now().isoformat())
+        self._throttle()
+        print("📡 Calling Semantic Scholar at", datetime.datetime.now().isoformat())
 
-        url = "https://api.semanticscholar.org/recommendations/v1/papers/forpapers"
-        payload = {
-            "positivePaperIds": positive_ids,
-            "negativePaperIds": negative_ids,
-            "fields": ["title", "abstract", "url", "paperId"],
+        url = "https://api.semanticscholar.org/recommendations/v1/papers"
+        headers = {'x-api-key': self.api_key,
+                   'Content-Type':'application/json'
+        }
+
+        params = {
+            "fields": "title,abstract,url,paperId,citationCount",
             "limit": limit
         }
 
+        payload = {
+            "positivePaperIds" : positive_ids,
+            "negativePaperIds" : negative_ids
+        }
+
         try:
-            response = requests.post(url, json=payload)
+            response = requests.post(url, headers=headers, params=params, json=payload)
 
             if response.status_code == 429:
+                print("⚠️ scholar.py: Rate limit exceeded.")
                 return {"error": "Rate limit exceeded."}
 
             response.raise_for_status()
@@ -67,21 +107,42 @@ class SemanticScholarClient:
                 return {"error": "No recommended papers returned."}
 
         except requests.RequestException as e:
+            print(f"❌ Request failed: {e}")
+            if hasattr(e, 'response') and e.response is not None:
+                print(f"📥 Response content: {e.response.status_code} - {e.response.text}")
             return {"error": f"Request failed: {str(e)}"}
 
 
     def get_fallback_paper(self):
 
-        if not self.fallback_cache:
-            print("Fetching new fallback cache...")
-            self.fallback_cache = self.search_paper(query=self.default_query, limit=20)
-            self.fallback_index = 0
+        while True:
 
-        if self.fallback_index >= len(self.fallback_cache):
-            print("Fallback cache exhausted. Refetching...")
-            self.fallback_cache = self.search_paper(query=self.default_query, limit=20)
-            self.fallback_index = 0
+            # Refill the cache if need be
+            if self.fallback_index >= len(self.fallback_cache):
+                offset = self.fallback_page * 20
+                print(f"📥 Fetching fallback page {self.fallback_page} with offset {offset}...")
+                self.fallback_cache = self.search_paper(query=self.default_query, limit=20, offset=offset)
+                self.fallback_index = 0
+                self.fallback_page += 1
 
-        paper = self.fallback_cache[self.fallback_index]
-        self.fallback_index += 1
-        return paper
+                # Exit if no data returned
+                if not isinstance(self.fallback_cache, list) or not self.fallback_cache:
+                    return {"error": "No fallback papers available."}
+
+            # Check for unseen paper
+            while self.fallback_index < len(self.fallback_cache):
+                paper = self.fallback_cache[self.fallback_index]
+                self.fallback_index += 1
+
+                if paper["paperId"] not in self.seen_ids:
+                    self.seen_ids.add(paper["paperId"])
+                    return paper
+
+            print("🔁 All fallback papers seen — fetching next page.")
+
+
+    def reset_fallback_state(self):
+        self.fallback_cache = []
+        self.fallback_index = 0
+        self.fallback_page = 0
+        self.seen_ids.clear()

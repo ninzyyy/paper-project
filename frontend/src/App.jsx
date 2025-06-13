@@ -86,6 +86,16 @@ function App() {
     fetchNextPaper();
   }
 
+  function handleResetSession() {
+    fetch("http://127.0.0.1:8000/reset-fallback", { method: "POST" })
+      .then(() => {
+        setPaper(null);
+        setLikedIds([]);
+        setDislikedIds([]);
+        fetchInitialPaper();
+      });
+  }
+
   return (
     <div>
       <h1>Paper Feed</h1>
@@ -118,6 +128,7 @@ function App() {
             <button onClick={handleLike}>👍 Like</button>
             <button onClick={handleNext}>⏭️ Next</button>
             <button onClick={() => setShowHistory(prev => !prev)}>📋 {showHistory ? "Hide" : "Show"} Liked/Disliked </button>
+            <button onClick={handleResetSession}>🧹 Reset Feed</button>
           </div>
         </div>
       )}
