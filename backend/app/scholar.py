@@ -34,10 +34,9 @@ class SemanticScholarClient:
     def search_paper(self, query:str, limit:int=1, offset:int=0):
 
         self._throttle()
-        print("📡 Calling Semantic Scholar at", datetime.datetime.now().isoformat())
+        print("📡 [search_paper]", datetime.datetime.now().isoformat())
 
-        if not query:
-            query = self.default_query
+        query = query or self.default_query
 
         url = "https://api.semanticscholar.org/graph/v1/paper/search"
         headers = {'x-api-key': self.api_key}
@@ -55,14 +54,8 @@ class SemanticScholarClient:
 
             response.raise_for_status()
             data = response.json()
-
-            if limit > 1:
-                return data["data"]
-            else:
-                if data.get("data"):
-                    return data["data"][0]
-                else:
-                    return {"error": "No papers found."}
+            results = data.get("data", [])
+            return results if limit > 1 else (results[0] if results else {"error": "No papers found."})
 
         except requests.RequestException as e:
             print(f"❌ Request failed: {e}")
@@ -74,18 +67,16 @@ class SemanticScholarClient:
     def get_recommended_paper_from_list(self, positive_ids, negative_ids, limit=1):
 
         self._throttle()
-        print("📡 Calling Semantic Scholar at", datetime.datetime.now().isoformat())
+        print("📡 [get_recommended_paper]", datetime.datetime.now().isoformat())
 
         url = "https://api.semanticscholar.org/recommendations/v1/papers"
         headers = {'x-api-key': self.api_key,
                    'Content-Type':'application/json'
         }
-
         params = {
             "fields": "title,abstract,url,paperId,citationCount",
             "limit": limit
         }
-
         payload = {
             "positivePaperIds" : positive_ids,
             "negativePaperIds" : negative_ids
@@ -99,12 +90,8 @@ class SemanticScholarClient:
                 return {"error": "Rate limit exceeded."}
 
             response.raise_for_status()
-            data = response.json()
-
-            if data.get("recommendedPapers"):
-                return data["recommendedPapers"][0]
-            else:
-                return {"error": "No recommended papers returned."}
+            papers = response.json().get("recommendedPapers", [])
+            return papers[0] if papers else {"error": "No recommended papers returned."}
 
         except requests.RequestException as e:
             print(f"❌ Request failed: {e}")
