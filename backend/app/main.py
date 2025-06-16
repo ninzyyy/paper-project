@@ -42,6 +42,29 @@ async def smart_next(request: Request):
     print("⚠️ main.py: Recommendation failed, using fallback paper.")
     return SemanticScholar.get_fallback_paper()
 
+@app.post("/recommendations")
+async def recommendations(request: Request):
+    payload = await request.json()
+    positive_ids = payload.get("positivePaperIds", [])
+    negative_ids = payload.get("negativePaperIds", [])
+
+    if not positive_ids or not negative_ids:
+        print("⚠️ main.py: /recommendations. No liked or disliked papers, using fallback.")
+        return [SemanticScholar.get_fallback_paper() for _ in range(5)]
+
+    batch = SemanticScholar.get_recommended_paper_from_list(
+        positive_ids=positive_ids,
+        negative_ids=negative_ids,
+        limit=5)
+
+    if isinstance(batch, dict) and "error" in batch:
+        print("⚠️ main.py: /recommendations. Error, returning fallback")
+        return [SemanticScholar.get_fallback_paper() for _ in range(5)]
+
+    if isinstance(batch, dict):
+        return [batch]
+
+    return batch
 
 @app.post("/reset-fallback")
 def reset_fallback():
