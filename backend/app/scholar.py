@@ -13,8 +13,8 @@ class SemanticScholarClient:
 
         if not S2_API_KEY:
             raise RuntimeError("❌ Semantic Scholar API key is not set in the environment.")
-
         self.api_key = S2_API_KEY
+
         self.default_query = "Asymptomatic infection of COVID-19"
         self.fallback_cache = []
         self.fallback_index = 0
@@ -37,7 +37,6 @@ class SemanticScholarClient:
         print("📡 [search_paper]", datetime.datetime.now().isoformat())
 
         query = query or self.default_query
-
         url = "https://api.semanticscholar.org/graph/v1/paper/search"
         headers = {'x-api-key': self.api_key}
         params = {"query":query,
@@ -58,9 +57,7 @@ class SemanticScholarClient:
             return results if limit > 1 else (results[0] if results else {"error": "No papers found."})
 
         except requests.RequestException as e:
-            print(f"❌ Request failed: {e}")
-            if hasattr(e, 'response') and e.response is not None:
-                print(f"📥 Response content: {e.response.status_code} - {e.response.text}")
+            print(f"❌ scholar.py, function search_paper: Request failed {e}")
             return {"error": f"Request failed: {str(e)}"}
 
 
@@ -86,15 +83,15 @@ class SemanticScholarClient:
             response = requests.post(url, headers=headers, params=params, json=payload)
 
             if response.status_code == 429:
-                print("⚠️ scholar.py: Rate limit exceeded.")
+                print("⚠️ scholar.py, function get_recommendations: Rate limit exceeded.")
                 return {"error": "Rate limit exceeded."}
 
             response.raise_for_status()
             papers = response.json().get("recommendedPapers", [])
-            return papers[0] if papers else {"error": "No recommended papers returned."}
+            return papers if limit > 1 else (papers[0] if papers else {"error": "No recommended papers returned."})
 
         except requests.RequestException as e:
-            print(f"❌ Request failed: {e}")
+            print(f"❌ scholar.py, function get_recommendations: Request failed {e}")
             if hasattr(e, 'response') and e.response is not None:
                 print(f"📥 Response content: {e.response.status_code} - {e.response.text}")
             return {"error": f"Request failed: {str(e)}"}
@@ -125,8 +122,16 @@ class SemanticScholarClient:
                     self.seen_ids.add(paper["paperId"])
                     return paper
 
-            print("🔁 All fallback papers seen — fetching next page.")
 
+    def get_fallback_batch(self, limit=5):
+        batch = []
+        while len(batch) < limit:
+            paper = self.get_fallback_paper()
+            if isinstance(paper, dict) and "paperId" in paper:
+                batch.append(paper)
+            else:
+                break
+        return batch
 
     def reset_fallback_state(self):
         self.fallback_cache = []

@@ -17,18 +17,19 @@ app.add_middleware(
 
 
 @app.get("/feed")
-def fetch_paper():
-    return SemanticScholar.get_fallback_paper()
+def fetch_papers(limit: int = 1):
+    return SemanticScholar.get_fallback_batch(limit=limit)
 
 
 @app.post("/recommendations")
 async def recommendations(request: Request):
+
     payload = await request.json()
     positive_ids = payload.get("positivePaperIds", [])
     negative_ids = payload.get("negativePaperIds", [])
 
     if not positive_ids or not negative_ids:
-        print("⚠️ main.py: /recommendations. No liked or disliked papers, using fallback.")
+        print("⚠️ main.py: /recommendations: No liked/disliked papers, returning fallback.")
         return [SemanticScholar.get_fallback_paper() for _ in range(5)]
 
     batch = SemanticScholar.get_recommendations(
@@ -40,10 +41,7 @@ async def recommendations(request: Request):
         print("⚠️ main.py: /recommendations. Error, returning fallback")
         return [SemanticScholar.get_fallback_paper() for _ in range(5)]
 
-    if isinstance(batch, dict):
-        return [batch]
-
-    return batch
+    return batch if isinstance(batch, list) else [batch]
 
 @app.post("/reset-fallback")
 def reset_fallback():
