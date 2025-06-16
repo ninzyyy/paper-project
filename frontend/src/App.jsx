@@ -70,6 +70,31 @@ function App() {
     setLoading(false);
   }
 
+  async function fetchRecommendationBatch() {
+
+    const body = {
+      positivePaperIds: likedIds,
+      negativePaperIds: dislikedIds,
+    };
+
+    try {
+      const response = await fetch("http://127.0.0.1:8000/recommendations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      const papers = await response.json();
+      if (Array.isArray(papers)) {
+        setRecommendationQueue(papers);
+      } else {
+        console.warn("Unexpected format in /smart-batch:", papers);
+      }
+    } catch (err) {
+      console.error("❌ Recommendation batch fetch failed:", err.message);
+    }
+  }
+
   function handleNext() {
     fetchNextPaper();
   }
