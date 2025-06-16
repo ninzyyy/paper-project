@@ -64,7 +64,7 @@ class SemanticScholarClient:
             return {"error": f"Request failed: {str(e)}"}
 
 
-    def get_recommended_paper_from_list(self, positive_ids, negative_ids, limit=1):
+    def get_recommendations(self, positive_ids, negative_ids, limit=1):
 
         self._throttle()
         print("📡 [get_recommended_paper]", datetime.datetime.now().isoformat())

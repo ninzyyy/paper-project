@@ -21,27 +21,6 @@ def fetch_paper():
     return SemanticScholar.get_fallback_paper()
 
 
-@app.post("/smart-next")
-async def smart_next(request: Request):
-    payload = await request.json()
-    positive_ids = payload.get("positivePaperIds", [])
-    negative_ids = payload.get("negativePaperIds", [])
-
-    if not positive_ids and not negative_ids:
-        print("⚠️ main.py: No liked or disliked papers, using fallback paper.")
-        return SemanticScholar.get_fallback_paper()
-
-    rec = SemanticScholar.get_recommended_paper_from_list(
-        positive_ids=positive_ids,
-        negative_ids=negative_ids
-    )
-
-    if "error" not in rec:
-        return rec
-
-    print("⚠️ main.py: Recommendation failed, using fallback paper.")
-    return SemanticScholar.get_fallback_paper()
-
 @app.post("/recommendations")
 async def recommendations(request: Request):
     payload = await request.json()
@@ -52,7 +31,7 @@ async def recommendations(request: Request):
         print("⚠️ main.py: /recommendations. No liked or disliked papers, using fallback.")
         return [SemanticScholar.get_fallback_paper() for _ in range(5)]
 
-    batch = SemanticScholar.get_recommended_paper_from_list(
+    batch = SemanticScholar.get_recommendations(
         positive_ids=positive_ids,
         negative_ids=negative_ids,
         limit=5)

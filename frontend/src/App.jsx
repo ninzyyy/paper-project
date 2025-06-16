@@ -12,11 +12,11 @@ function App() {
 
   // Initial mounting of the app
   useEffect(() => {
-    fetchInitialPaper(); // Load the first paper
-  }, []); // The empty array means this runs only once
+    fetchFallbackBatch();
+  }, []);
 
   // Function to get the initial paper from the '/feed' endpoint
-  function fetchInitialPaper(){
+  function fetchFallbackBatch(){
     setLoading(true); // Display loading indicator
     fetch("http://127.0.0.1:8000/feed") // Send HTTP GET request
       .then((response) => response.json()) // Convert the response to JSON
