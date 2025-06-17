@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { AnimatePresence, motion } from "framer-motion";
 
 function App() {
 
@@ -12,6 +13,7 @@ function App() {
   const [fallbackQueue, setFallbackQueue] = useState([]);
   const [recommendationQueue, setRecommendationQueue] = useState([]);
   const [actionCount, setActionCount] = useState(0);
+  const [showFullAbstract, setShowFullAbstract] = useState(false);
 
   // Load the first batch of fallback papers on mount
   useEffect(() => {
@@ -61,30 +63,6 @@ function App() {
       }
     } catch (err) {
       console.error("❌ Recommendation batch fetch failed:", err.message);
-    }
-  }
-
-  // Handle like/dislike feedback
-  function handleFeedback(isLiked) {
-
-    if (!paper?.paperId) return;
-
-    if (isLiked) setLikedIds(prev => [...prev, paper.paperId]);
-    else setDislikedIds(prev => [...prev, paper.paperId]);
-
-    setActionCount(prev => prev + 1);
-
-    const nextQueue = fallbackQueue.slice(1);
-    setFallbackQueue(nextQueue);
-    setPaper(nextQueue[0] || null);
-
-    if ((actionCount + 1) % 5 === 0) {
-      fetchRecommendationBatch();
-    }
-
-    if (nextQueue.length === 1 && recommendationQueue.length > 0) {
-      setFallbackQueue(recommendationQueue);
-      setRecommendationQueue([]);
     }
   }
 
@@ -150,6 +128,10 @@ function App() {
         setPaper(null);
         setLikedIds([]);
         setDislikedIds([]);
+        setFallbackQueue([]);
+        setRecommendationQueue([]);
+        setActionCount(0);
+        setShowHistory(false);
         fetchFallbackBatch();
       });
   }
@@ -162,27 +144,103 @@ function App() {
       {loading && <p>Loading...</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
 
-      {!loading && paper && !error && (
-        <div style={styles.card}>
-          <h2 style={styles.title}>{paper.title}</h2>
-          <p>{paper.abstract || "No abstract available."}</p>
-          <div style={{ marginTop: "1rem" }}>
-            <a href={paper.url} target="_blank" rel="noreferrer">
-              🔗 View Source
-            </a>
-          </div>
+      <AnimatePresence mode="wait">
+        {!loading && paper && !error && (
+          <motion.div
+            key={paper.paperId}
+            style={styles.card}
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            onDragEnd={(event, info) => {
+              const offsetX = info.offset.x;
+              const offsetY = info.offset.y;
 
-          <div style={styles.buttons}>
-            <button onClick={() => handleFeedback(false)}>👎 Dislike</button>
-            <button onClick={() => handleFeedback(true)}>👍 Like</button>
-            <button onClick={handleSkip}>⏭️ Skip</button>
-            <button onClick={() => setShowHistory((prev) => !prev)}>
-              📋 {showHistory ? "Hide" : "Show"} History
-            </button>
-            <button onClick={handleResetSession}>🧹 Reset</button>
-          </div>
-        </div>
-      )}
+              const swipeConfidence = 100; // Threshold in pixels
+
+              if (offsetX > swipeConfidence) {
+                handleFeedback(true); // 👉 right = like
+              } else if (offsetX < -swipeConfidence) {
+                handleFeedback(false); // 👈 left = dislike
+              } else if (offsetY < -swipeConfidence) {
+                handleSkip(); // ☝️ up = skip (optional)
+              }
+            }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.25 }}
+          >
+            <h2 style={styles.title}>
+              <a
+                href={paper.url}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  color: "inherit",
+                  textDecoration: "none",
+                }}
+                onMouseEnter={(e) => (e.target.style.color = "#007bff")}
+                onMouseLeave={(e) => (e.target.style.color = "inherit")}
+              >
+                {paper.title}
+              </a>
+            </h2>
+
+            <div
+              style={{
+                maxHeight: showFullAbstract ? "none" : "30vh",
+                overflow: "hidden",
+                position: "relative",
+                transition: "max-height 0.3s ease",
+              }}
+            >
+              <p style={{ lineHeight: 1.6 }}>
+                {paper.abstract || "No abstract available."}
+              </p>
+
+              {!showFullAbstract && paper.abstract && (
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "3rem",
+                    background: "linear-gradient(to bottom, transparent, #fff)",
+                  }}
+                />
+              )}
+            </div>
+
+            {paper.abstract && paper.abstract.length > 300 && (
+              <button
+                onClick={() => setShowFullAbstract(!showFullAbstract)}
+                style={{
+                  marginTop: "0.5rem",
+                  background: "none",
+                  border: "none",
+                  color: "#007bff",
+                  cursor: "pointer",
+                  fontSize: "0.9rem",
+                }}
+              >
+                {showFullAbstract ? "Show less" : "Read more"}
+              </button>
+            )}
+
+            {/* Floating buttons will replace this */}
+            <div style={styles.buttons}>
+              <button onClick={() => handleFeedback(false)}>👎 Dislike</button>
+              <button onClick={() => handleFeedback(true)}>👍 Like</button>
+              <button onClick={handleSkip}>⏭️ Skip</button>
+              <button onClick={() => setShowHistory((prev) => !prev)}>
+                📋 {showHistory ? "Hide" : "Show"} History
+              </button>
+              <button onClick={handleResetSession}>🧹 Reset</button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {!loading && showHistory && (
         <div style={styles.history}>
@@ -194,6 +252,7 @@ function App() {
       )}
     </div>
   );
+
 }
 
 const styles = {
