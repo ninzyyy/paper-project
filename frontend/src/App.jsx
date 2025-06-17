@@ -123,13 +123,22 @@ function App() {
     });
 
     const nextQueue = fallbackQueue.slice(1);
-    setFallbackQueue(nextQueue);
-    setPaper(nextQueue[0] || null);
-
-    // Switch to recommendation queue when fallback is nearly empty
+    // If recommendationQueue is ready, use it as fallback
     if (nextQueue.length === 1 && recommendationQueue.length > 0) {
       setFallbackQueue(recommendationQueue);
       setRecommendationQueue([]);
+      setPaper(recommendationQueue[0]);
+    }
+
+    // If fallbackQueue is empty and no recommendations, refetch
+    else if (nextQueue.length === 0 && recommendationQueue.length === 0) {
+      fetchFallbackBatch();  // Trigger re-fill
+    }
+
+    // Normal case
+    else {
+      setFallbackQueue(nextQueue);
+      setPaper(nextQueue[0] || null);
     }
   }
 

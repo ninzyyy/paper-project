@@ -1,5 +1,6 @@
 import os
 import requests
+import random
 import time, datetime
 from dotenv import load_dotenv
 
@@ -15,7 +16,18 @@ class SemanticScholarClient:
             raise RuntimeError("❌ Semantic Scholar API key is not set in the environment.")
         self.api_key = S2_API_KEY
 
-        self.default_query = "Asymptomatic infection of COVID-19"
+        self.seed_queries = ["Asymptomatic infection of COVID-19",
+                             "Single-cell RNA sequencing",
+                             "Protein-protein interactions",
+                             "CRISPR gene editing",
+                             "Deep learning in healthcare",
+                             "Microbiome diversity and health",
+                             "Cancer immunotherapy targets",
+                             "Neuroscience of memory",
+                             "Antibiotic resistance mechanisms",
+                             "Climate change and species migration"]
+
+        self.default_query = random.choice(self.seed_queries)
         self.fallback_cache = []
         self.fallback_index = 0
         self.fallback_page = 0
