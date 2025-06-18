@@ -111,7 +111,9 @@ export default function usePaperQueue({ setLocked, LOCK_DURATION_MS }) {
       fetchFallbackBatch();
     } else {
       setFallbackQueue(nextQueue);
-      setPaper(nextQueue[0] || null);
+      if (nextQueue.length > 0) {
+        setPaper(nextQueue[0]);
+      }
     }
   }
 
