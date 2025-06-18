@@ -95,25 +95,21 @@ export default function usePaperQueue({ setLocked, LOCK_DURATION_MS }) {
   function advanceQueue() {
     setActionCount((count) => {
       const newCount = count + 1;
-      if (newCount % 5 === 0) {
-        fetchRecommendationBatch();
-      }
+      if (newCount % 5 === 0) fetchRecommendationBatch();
       return newCount;
     });
 
     const nextQueue = fallbackQueue.slice(1);
 
-    if (nextQueue.length === 1 && recommendationQueue.length > 0) {
+    if (nextQueue.length > 0) {
+      setFallbackQueue(nextQueue);
+      setPaper(nextQueue[0]);
+    } else if (recommendationQueue.length > 0) {
       setFallbackQueue(recommendationQueue);
       setRecommendationQueue([]);
       setPaper(recommendationQueue[0]);
-    } else if (nextQueue.length === 0 && recommendationQueue.length === 0) {
-      fetchFallbackBatch();
     } else {
-      setFallbackQueue(nextQueue);
-      if (nextQueue.length > 0) {
-        setPaper(nextQueue[0]);
-      }
+      fetchFallbackBatch();
     }
   }
 

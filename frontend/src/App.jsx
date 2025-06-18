@@ -13,13 +13,10 @@ function App() {
   const [locked, setLocked] = useState(false);
   const LOCK_DURATION_MS = 500;
   const [keyboardSwipeDirection, setKeyboardSwipeDirection] = useState(null);
-
   const {
     paper,
     likedIds,
     dislikedIds,
-    fallbackQueue,
-    recommendationQueue,
     loading,
     error,
     lockedRef,

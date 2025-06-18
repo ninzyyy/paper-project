@@ -105,6 +105,7 @@ function PaperCard({
 }
 
 const styles = {
+
   card: {
     maxWidth: "600px",
     margin: "2rem auto",
@@ -113,16 +114,19 @@ const styles = {
     boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
     backgroundColor: "#fff",
   },
+
   title: {
     marginBottom: "1rem",
     fontSize: "1.5rem",
   },
+
   buttons: {
     marginTop: "1rem",
     display: "flex",
     flexWrap: "wrap",
     gap: "0.5rem",
   },
+
   readMore: {
     marginTop: "0.5rem",
     background: "none",
