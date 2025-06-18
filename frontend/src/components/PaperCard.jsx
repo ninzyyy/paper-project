@@ -51,6 +51,8 @@ function PaperCard({
             color: "inherit",
             textDecoration: "none",
           }}
+          onMouseEnter={(e) => (e.target.style.color = "#007bff")}
+          onMouseLeave={(e) => (e.target.style.color = "inherit")}
         >
           {paper.title}
         </a>
