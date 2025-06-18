@@ -37,7 +37,7 @@ function PaperCard({
         else if (offsetY < -SWIPE_CONFIDENCE) onSkip();
       }}
       variants={swipeVariants}
-      animate={keyboardSwipeDirection || "default"} // ← animation trigger
+      animate={keyboardSwipeDirection || "default"}
       initial={{ opacity: 0, scale: 0.95 }}
       exit={{ opacity: 0, scale: 0.9 }}
       transition={{ duration: 0.5, ease: "easeInOut" }}
