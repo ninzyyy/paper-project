@@ -1,21 +1,45 @@
 import { useEffect } from "react";
 
 
-export default function useKeyboardShortcuts({ paper, lockedRef, onLike, onDislike, onSkip }) {
+export default function useKeyboardShortcuts({
+  paper,
+  lockedRef,
+  onLike,
+  onDislike,
+  onSkip,
+  setKeyboardSwipeDirection
+ }) {
+
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (!paper || lockedRef.current) return;
 
       switch (event.key) {
+
         case "ArrowRight":
-          onLike();
+          setKeyboardSwipeDirection("right");
+          setTimeout(() => {
+            onLike();
+            setKeyboardSwipeDirection(null);
+          }, 300);
           break;
+
         case "ArrowLeft":
-          onDislike();
+          setKeyboardSwipeDirection("left");
+          setTimeout(() => {
+            onDislike();
+            setKeyboardSwipeDirection(null);
+          }, 300);
           break;
-        // case "ArrowUp":
-        //   onSkip();
-        //   break;
+
+        case "ArrowUp":
+          setKeyboardSwipeDirection("up");
+          setTimeout(() => {
+            onSkip();
+            setKeyboardSwipeDirection(null);
+          }, 300);
+          break;
+
         default:
           break;
       }
@@ -25,5 +49,5 @@ export default function useKeyboardShortcuts({ paper, lockedRef, onLike, onDisli
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [paper, onLike, onDislike, onSkip, lockedRef]);
+  }, [paper, onLike, onDislike, onSkip, lockedRef, setKeyboardSwipeDirection]);
 }

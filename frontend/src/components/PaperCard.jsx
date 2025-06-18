@@ -1,6 +1,13 @@
 import { motion } from "framer-motion";
 
 const SWIPE_CONFIDENCE = 100; // Number of pixels to complete "swipe"
+const swipeVariants = {
+  default: { x: 0, y: 0, opacity: 1, scale: 1 },
+  left: { x: -500, opacity: 0 },
+  right: { x: 500, opacity: 0 },
+  up: { y: -500, opacity: 0 },
+};
+
 
 function PaperCard({
   paper,
@@ -13,6 +20,7 @@ function PaperCard({
   onReset,
   onToggleHistory,
   showHistory,
+  keyboardSwipeDirection,
 }) {
   return (
     <motion.div
@@ -28,10 +36,11 @@ function PaperCard({
         else if (offsetX < -SWIPE_CONFIDENCE) onDislike();
         else if (offsetY < -SWIPE_CONFIDENCE) onSkip();
       }}
+      variants={swipeVariants}
+      animate={keyboardSwipeDirection || "default"} // ← animation trigger
       initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
-      transition={{ duration: 0.25 }}
+      transition={{ duration: 0.5, ease: "easeInOut" }}
     >
       <h2 style={styles.title}>
         <a

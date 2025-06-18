@@ -12,7 +12,7 @@ function App() {
   const [showFullAbstract, setShowFullAbstract] = useState(false);
   const [locked, setLocked] = useState(false);
   const LOCK_DURATION_MS = 500;
-
+  const [keyboardSwipeDirection, setKeyboardSwipeDirection] = useState(null);
 
   const {
     paper,
@@ -35,6 +35,7 @@ function App() {
     onLike: () => handleFeedback(true),
     onDislike: () => handleFeedback(false),
     onSkip: handleSkip,
+    setKeyboardSwipeDirection
   });
 
 
@@ -58,6 +59,7 @@ function App() {
             onReset={handleResetSession}
             onToggleHistory={() => setShowHistory((prev) => !prev)}
             showHistory={showHistory}
+            keyboardSwipeDirection={keyboardSwipeDirection}
           />
         )}
       </AnimatePresence>
