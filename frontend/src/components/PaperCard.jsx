@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHeart, faXmark, faArrowLeft, faArrowRight, faThumbsDown, faClock, faRotateLeft} from "@fortawesome/free-solid-svg-icons";
+import { faHeart, faXmark, faArrowLeft, faArrowRight, faThumbsDown, faClock, faRotateLeft, faEllipsisH} from "@fortawesome/free-solid-svg-icons";
+import { useState } from "react";
 
 const SWIPE_CONFIDENCE = 100;
 const swipeVariants = {
@@ -9,6 +10,7 @@ const swipeVariants = {
   right: { x: 500, opacity: 0 },
   up: { y: -500, opacity: 0 },
 };
+
 
 function PaperCard({
   paper,
@@ -24,6 +26,9 @@ function PaperCard({
   keyboardSwipeDirection,
   actionType
 }) {
+
+  const [showAllAuthors, setShowAllAuthors] = useState(false);
+
   return (
     <>
       <AnimatePresence>
@@ -103,6 +108,57 @@ function PaperCard({
             {paper.title}
           </a>
         </h2>
+
+        <p style={{ fontSize: "0.95rem", color: "#666", marginTop: "0", marginBottom: "1rem" }}>
+          {(() => {
+            const authors = paper.authors || [];
+            const first = authors[0]?.name;
+            const second = authors[1]?.name;
+            const last = authors.at(-1)?.name;
+
+            if (showAllAuthors || authors.length <= 3) {
+              return (
+                <>
+                  {authors.map((a, i) => (
+                    <span key={i}>
+                      {a.name}
+                      {i < authors.length - 1 ? ", " : ""}
+                    </span>
+                  ))}
+                  {authors.length > 3 && (
+                    <span
+                      onClick={() => setShowAllAuthors(false)}
+                      style={{
+                        marginLeft: "0.5rem",
+                        cursor: "pointer",
+                        fontSize: "0.8rem",         // Smaller text
+                        color: "#007bff",
+                        opacity: 0.8,               // Slightly lighter
+                      }}
+                    >
+                      [collapse]
+                    </span>
+                  )}
+                </>
+              );
+            } else {
+              return (
+                <>
+                  <span>{first}, {second}, </span>
+                  <span
+                    onClick={() => setShowAllAuthors(true)}
+                    style={{ cursor: "pointer",
+                             color: "#007bff",
+                             fontSize: "0.8rem",
+                             marginRight: "0",
+                             marginLeft: "0.25rem" }}
+                    title="Show all authors"
+                  >[...]</span>, <span>{last}</span>
+                </>
+              );
+            }
+          })()}
+        </p>
 
         <div
           style={{
