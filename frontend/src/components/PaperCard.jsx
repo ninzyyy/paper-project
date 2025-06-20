@@ -11,6 +11,10 @@ const swipeVariants = {
   up: { y: -500, opacity: 0 },
 };
 
+// Insert a space between lowercase-uppercase text (i.e. JournalArticle -> Journal Article)
+function formatType(type) {
+  return type.replace(/([a-z])([A-Z])/g, "$1 $2");
+}
 
 function PaperCard({
   paper,
@@ -96,6 +100,25 @@ function PaperCard({
         transition={{ duration: 0.5, ease: "easeInOut" }}
       >
 
+        {(paper.journal?.name || paper.publicationTypes?.length) && (
+          <div style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "0.5rem",
+            fontSize: "0.85rem",
+            color: "#666"
+          }}>
+            {/* Journal name */}
+            <span>{paper.journal?.name}</span>
+
+            {/* Article type (e.g., Journal Article, Review, etc.) */}
+            <span>
+              {paper.publicationTypes?.map(formatType).join(", ")}
+            </span>
+          </div>
+        )}
+
         <h2 style={styles.title}>
           <a
             href={paper.url}
@@ -109,7 +132,7 @@ function PaperCard({
           </a>
         </h2>
 
-        <p style={{ fontSize: "0.95rem", color: "#666", marginTop: "0", marginBottom: "1rem" }}>
+        <p style={{ fontSize: "0.85rem", color: "#666", marginTop: "0", marginBottom: "1rem" }}>
           {(() => {
             const authors = paper.authors || [];
             const first = authors[0]?.name;
@@ -161,7 +184,7 @@ function PaperCard({
         </p>
 
         {paper.publicationDate && (
-          <p style={{ fontSize: "0.95rem", color: "#666", marginTop: "-0.75rem", marginBottom: "1rem" }}>
+          <p style={{ fontSize: "0.85rem", color: "#666", marginTop: "-0.75rem", marginBottom: "1rem" }}>
             {new Date(paper.publicationDate).toLocaleDateString("en-US", {year:"numeric", month:"short", day:"numeric"})}
           </p>
         )}
