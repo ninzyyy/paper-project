@@ -103,18 +103,19 @@ function PaperCard({
         {(paper.journal?.name || paper.publicationTypes?.length) && (
           <div style={{
             display: "flex",
-            justifyContent: "space-between",
             alignItems: "center",
             marginBottom: "0.5rem",
             fontSize: "0.85rem",
-            color: "#666"
+            color: "#888"
           }}>
-            {/* Journal name */}
-            <span>{paper.journal?.name}</span>
-
-            {/* Article type (e.g., Journal Article, Review, etc.) */}
             <span>
-              {paper.publicationTypes?.map(formatType).join(", ")}
+              {paper.publicationTypes?.length > 0 && (
+                <span>
+                  {paper.publicationTypes.map(formatType).join(", ")}
+                </span>
+              )}
+              {paper.publicationTypes?.length > 0 && paper.journal?.name && " | "}
+              {paper.journal?.name}
             </span>
           </div>
         )}
@@ -132,7 +133,7 @@ function PaperCard({
           </a>
         </h2>
 
-        <p style={{ fontSize: "0.85rem", color: "#666", marginTop: "0", marginBottom: "1rem" }}>
+        <p style={{ fontSize: "0.85rem", color: "#888", marginTop: "0", marginBottom: "1rem" }}>
           {(() => {
             const authors = paper.authors || [];
             const first = authors[0]?.name;
@@ -154,9 +155,9 @@ function PaperCard({
                       style={{
                         marginLeft: "0.5rem",
                         cursor: "pointer",
-                        fontSize: "0.8rem",         // Smaller text
+                        fontSize: "0.8rem",
                         color: "#007bff",
-                        opacity: 0.8,               // Slightly lighter
+                        opacity: 0.8,
                       }}
                     >
                       [collapse]
@@ -184,7 +185,7 @@ function PaperCard({
         </p>
 
         {paper.publicationDate && (
-          <p style={{ fontSize: "0.85rem", color: "#666", marginTop: "-0.75rem", marginBottom: "1rem" }}>
+          <p style={{ fontSize: "0.85rem", color: "#888", marginTop: "-0.75rem", marginBottom: "1rem" }}>
             {new Date(paper.publicationDate).toLocaleDateString("en-US", {year:"numeric", month:"short", day:"numeric"})}
           </p>
         )}
