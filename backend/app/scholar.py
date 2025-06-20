@@ -54,7 +54,7 @@ class SemanticScholarClient:
         params = {"query":query,
                   "limit":limit,
                   "offset": offset,
-                  "fields":"title,abstract,authors,url,paperId"
+                  "fields":"title,abstract,authors,url,paperId,publicationDate"
                  }
 
         try:
@@ -83,7 +83,7 @@ class SemanticScholarClient:
                    'Content-Type':'application/json'
         }
         params = {
-            "fields": "title,abstract,authors,url,paperId,citationCount",
+            "fields": "title,abstract,authors,url,paperId,citationCount,publicationDate",
             "limit": limit
         }
         payload = {

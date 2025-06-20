@@ -160,6 +160,12 @@ function PaperCard({
           })()}
         </p>
 
+        {paper.publicationDate && (
+          <p style={{ fontSize: "0.95rem", color: "#666", marginTop: "-0.75rem", marginBottom: "1rem" }}>
+            {new Date(paper.publicationDate).toLocaleDateString("en-US", {year:"numeric", month:"short", day:"numeric"})}
+          </p>
+        )}
+
         <div
           style={{
             maxHeight: showFullAbstract ? "none" : "30vh",
