@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHeart, faXmark, faArrowLeft, faArrowRight, faThumbsDown, faClock, faRotateLeft, faEllipsisH} from "@fortawesome/free-solid-svg-icons";
+import { faHeart, faXmark, faUnlock, faArrowLeft, faArrowRight, faThumbsDown, faClock, faRotateLeft, faEllipsisH} from "@fortawesome/free-solid-svg-icons";
 import { useState } from "react";
 
 const SWIPE_CONFIDENCE = 100;
@@ -26,11 +26,12 @@ function PaperCard({
   onToggleHistory,
   showHistory,
   keyboardSwipeDirection,
-  actionType
+  actionType,
+  showFullAbstract,
+  setShowFullAbstract
 }) {
 
   const [showAllAuthors, setShowAllAuthors] = useState(false);
-  const [showFullAbstract, setShowFullAbstract] = useState(false);
 
   return (
     <>

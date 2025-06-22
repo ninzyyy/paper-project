@@ -7,6 +7,7 @@ export default function useKeyboardShortcuts({
   onLike,
   onDislike,
   onSkip,
+  onToggleAbstract,
   setKeyboardSwipeDirection
  }) {
 
@@ -38,6 +39,12 @@ export default function useKeyboardShortcuts({
             onSkip();
             setKeyboardSwipeDirection(null);
           }, 300);
+          break;
+
+        case "ArrowDown":
+          if (onToggleAbstract) {
+            onToggleAbstract();
+          }
           break;
 
         default:

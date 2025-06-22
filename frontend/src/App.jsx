@@ -48,6 +48,11 @@ function App() {
       setActionType("skip");
       setTimeout(() => setActionType(null), 400);
     },
+    onToggleAbstract: () => {
+      if (paper?.abstract) {
+        setShowFullAbstract(prev => !prev)
+      }
+    },
     setKeyboardSwipeDirection
   });
 
