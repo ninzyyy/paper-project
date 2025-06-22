@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHeart, faXmark, faUnlock, faArrowLeft, faArrowRight, faThumbsDown, faClock, faRotateLeft, faEllipsisH} from "@fortawesome/free-solid-svg-icons";
+import { faHeart, faXmark, faLockOpen, faArrowLeft, faArrowRight, faThumbsDown, faClock, faRotateLeft, faEllipsisH} from "@fortawesome/free-solid-svg-icons";
 import { useState } from "react";
 
 const SWIPE_CONFIDENCE = 100;
@@ -131,6 +131,15 @@ function PaperCard({
           >
             {paper.title}
           </a>
+          {/*
+          {paper.openAccessPdf?.url && (
+            <FontAwesomeIcon
+              icon={faLockOpen}
+              style={{ marginLeft: "0.5rem", color: "#007bff", fontSize: "0.8rem" }}
+              title="Open Access PDF"
+            />
+          )}
+          */}
         </h2>
 
         <p style={{ fontSize: "0.85rem", color: "#888", marginTop: "0", marginBottom: "1rem" }}>
