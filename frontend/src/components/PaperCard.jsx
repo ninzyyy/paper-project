@@ -259,34 +259,23 @@ function PaperCard({
             </button>
 
             {showShortcuts && (
-              <div style={styles.shortcutPopup}>
-                <div style={{ textAlign: "center", fontWeight: 600, marginBottom: "0.5rem" }}>
-                  Keyboard Shortcuts
-                </div>
+            <div style={styles.tooltip}>
+              <div style={styles.centerText}>Skip</div>
+              <div style={styles.centerIcon}><FontAwesomeIcon icon={faSquareCaretUp} /></div>
 
-                <div style={styles.keyGrid}>
-                  <div />
-                  <div style={styles.keyIconBlock}>
-                    <FontAwesomeIcon icon={faSquareCaretUp} size="lg" />
-                    <div style={styles.label}>Skip</div>
-                  </div>
-                  <div />
-
-                  <div style={styles.keyIconBlock}>
-                    <FontAwesomeIcon icon={faSquareCaretLeft} size="lg" />
-                    <div style={styles.label}>Dislike</div>
-                  </div>
-                  <div style={styles.keyIconBlock}>
-                    <FontAwesomeIcon icon={faSquareCaretDown} size="lg" />
-                    <div style={styles.label}>Abstract</div>
-                  </div>
-                  <div style={styles.keyIconBlock}>
-                    <FontAwesomeIcon icon={faSquareCaretRight} size="lg" />
-                    <div style={styles.label}>Like</div>
-                  </div>
+              <div style={styles.middleRow}>
+                <div style={styles.sideText}>Dislike</div>
+                <div style={styles.arrowIcons}>
+                  <FontAwesomeIcon icon={faSquareCaretLeft} />
+                  <FontAwesomeIcon icon={faSquareCaretDown} style={{ margin: "0 0.5rem" }} />
+                  <FontAwesomeIcon icon={faSquareCaretRight} />
                 </div>
+                <div style={styles.sideText}>Like</div>
               </div>
-            )}
+
+              <div style={styles.centerText}>Abstract</div>
+            </div>
+          )}
 
           </div>
 
@@ -361,7 +350,7 @@ const styles = {
     padding: 0,
   },
 
-  shortcutPopup: {
+  tooltip: {
     position: "absolute",
     bottom: "2.2rem",
     right: "0",
@@ -369,33 +358,46 @@ const styles = {
     border: "1px solid #ccc",
     borderRadius: "8px",
     padding: "0.5rem 0.75rem",
-    fontSize: "0.85rem",
-    lineHeight: "1.4",
+    fontSize: "0.8rem",
     boxShadow: "0 2px 12px rgba(0,0,0,0.15)",
-    width: "180px",
     textAlign: "center",
     zIndex: 1000,
+    width: "fit-content",
+    minWidth: "120px",
   },
 
-  keyGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(3, 1fr)",
-    gap: "0.2rem",
-    justifyItems: "center",
-    alignItems: "center",
-  },
-
-  keyIconBlock: {
-    textAlign: "center",
-    color: "#e0e0e0",
-    fontSize: "1.25rem",
-    lineHeight: 1.1,
-  },
-
-  label: {
-    fontSize: "0.65rem",
-    marginTop: "0.2rem",
+  centerText: {
+    fontSize: "0.7rem",
     color: "#007bff",
+    marginBottom: "0.25rem",
+  },
+
+  centerIcon: {
+    fontSize: "1.2rem",
+    color: "#888",
+    marginBottom: "0.5rem",
+  },
+
+  middleRow: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "0.5rem",
+    marginBottom: "0.5rem",
+  },
+
+  arrowIcons: {
+    display: "flex",
+    alignItems: "center",
+    fontSize: "1.2rem",
+    color: "#888",
+  },
+
+  sideText: {
+    fontSize: "0.7rem",
+    color: "#007bff",
+    width: "3rem",
+    textAlign: "center",
   },
 
 };
