@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHeart, faXmark, faLockOpen, faArrowLeft, faArrowRight, faThumbsDown, faClock, faRotateLeft, faEllipsisH} from "@fortawesome/free-solid-svg-icons";
+import { faHeart, faXmark, faQuestionCircle, faLockOpen, faArrowLeft, faArrowRight, faThumbsDown, faClock, faRotateLeft, faEllipsisH} from "@fortawesome/free-solid-svg-icons";
 import { useState } from "react";
 
 const SWIPE_CONFIDENCE = 100;
@@ -32,6 +32,7 @@ function PaperCard({
 }) {
 
   const [showAllAuthors, setShowAllAuthors] = useState(false);
+  const [showShortcuts, setShowShortcuts] = useState(false);
 
   return (
     <>
@@ -248,12 +249,57 @@ function PaperCard({
             <FontAwesomeIcon icon={faRotateLeft} color="#007bff" /> Reset
           </button>
         </div>
+
+
+          <div
+            style={styles.shortcutIconContainer}
+            onMouseEnter={() => setShowShortcuts(true)}
+            onMouseLeave={() => setShowShortcuts(false)}
+          >
+            <button style={styles.shortcutIconButton} title="Keyboard Shortcuts">
+              <FontAwesomeIcon icon={faQuestionCircle} />
+            </button>
+
+            {showShortcuts && (
+              <div style={styles.shortcutPopup}>
+                <div style={{ textAlign: "center", marginBottom: "0.5rem", fontWeight: "bold" }}>Keyboard Shortcuts</div>
+
+                <div style={{ textAlign: "center", marginBottom: "0.25rem" }}>Skip</div>
+                <div style={{ textAlign: "center", fontSize: "1.2rem" }}><kbd>↑</kbd></div>
+
+                <div style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  fontSize: "1.2rem",
+                  marginTop: "0.25rem",
+                }}>
+                  <div style={{ textAlign: "center" }}>
+                    <div>Dislike</div>
+                    <kbd>←</kbd>
+                  </div>
+                  <div style={{ textAlign: "center" }}>
+                    <kbd>↓</kbd>
+                    <div style={{ fontSize: "0.8rem" }}>Toggle</div>
+                    <div style={{ fontSize: "0.8rem" }}>Abstract</div>
+                  </div>
+                  <div style={{ textAlign: "center" }}>
+                    <div>Like</div>
+                    <kbd>→</kbd>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
       </motion.div>
     </>
   );
 }
 
 const styles = {
+
   card: {
     position: "relative",
     maxWidth: "600px",
@@ -263,22 +309,26 @@ const styles = {
     boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
     backgroundColor: "#fff",
   },
+
   title: {
     marginBottom: "1rem",
     fontSize: "1.5rem",
   },
+
   buttons: {
     marginTop: "1rem",
     display: "flex",
     flexWrap: "wrap",
     gap: "0.5rem",
   },
+
     abstractPreview: {
     maxHeight: "6rem",
     overflow: "hidden",
     position: "relative",
     marginBottom: "0.5rem"
   },
+
   fadeOut: {
     position: "absolute",
     bottom: 0,
@@ -287,6 +337,7 @@ const styles = {
     height: "2rem",
     background: "linear-gradient(to top, white, rgba(255,255,255,0))"
   },
+
   readMore: {
     marginTop: "0rem",
     background: "none",
@@ -295,6 +346,38 @@ const styles = {
     cursor: "pointer",
     fontSize: "0.9rem",
   },
+
+  shortcutIconContainer: {
+    position: "absolute",
+    bottom: "1rem",
+    right: "1rem",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-end",
+    zIndex: 10,
+  },
+
+  shortcutIconButton: {
+    background: "none",
+    border: "none",
+    cursor: "pointer",
+    fontSize: "1.25rem",
+    color: "#007bff",
+    padding: 0,
+  },
+
+  shortcutPopup: {
+    marginTop: "0.5rem",
+    background: "#fff",
+    border: "1px solid #ccc",
+    borderRadius: "8px",
+    padding: "0.75rem 1rem",
+    fontSize: "0.9rem",
+    lineHeight: "1.4",
+    boxShadow: "0 2px 12px rgba(0,0,0,0.15)",
+    width: "220px",
+    textAlign: "center",
+  }
 };
 
 export default PaperCard;
