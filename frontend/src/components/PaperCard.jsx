@@ -121,7 +121,7 @@ function PaperCard({
 
         <h2 style={styles.title}>
           <a
-            href={paper.url}
+            href={paper.openAccessPdf?.url || paper.url}
             target="_blank"
             rel="noreferrer"
             style={{ color: "inherit", textDecoration: "none" }}
@@ -189,7 +189,7 @@ function PaperCard({
           </p>
         )}
 
-        {paper.abstract ? (
+        {paper.abstract && (
           <div style={{ marginBottom: "1rem", fontSize: "0.95rem", lineHeight: "1.4" }}>
             {!showFullAbstract ? (
               <>
@@ -216,18 +216,8 @@ function PaperCard({
               </>
             )}
           </div>
-        ) : (
-          <p style={{ marginBottom: "1rem" }}>
-            <a
-              href={paper.url}
-              target="_blank"
-              rel="noreferrer"
-              style={{ color: "#007bff" }}
-            >
-              View paper online
-            </a>
-          </p>
         )}
+
 
 
 
