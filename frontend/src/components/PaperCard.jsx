@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHeart, faXmark, faQuestionCircle, faLockOpen, faArrowLeft, faArrowRight, faThumbsDown, faClock, faRotateLeft, faEllipsisH} from "@fortawesome/free-solid-svg-icons";
+import { faHeart, faXmark, faSquareCaretUp, faSquareCaretDown, faSquareCaretLeft, faSquareCaretRight, faQuestionCircle, faLockOpen, faArrowLeft, faArrowRight, faThumbsDown, faClock, faRotateLeft, faEllipsisH} from "@fortawesome/free-solid-svg-icons";
 import { useState } from "react";
 
 const SWIPE_CONFIDENCE = 100;
@@ -230,8 +230,6 @@ function PaperCard({
         )}
 
 
-
-
         <div style={styles.buttons}>
           <button onClick={onDislike} disabled={locked}>
             <FontAwesomeIcon icon={faThumbsDown} color="#007bff" /> Dislike
@@ -262,35 +260,34 @@ function PaperCard({
 
             {showShortcuts && (
               <div style={styles.shortcutPopup}>
-                <div style={{ textAlign: "center", marginBottom: "0.5rem", fontWeight: "bold" }}>Keyboard Shortcuts</div>
+                <div style={{ textAlign: "center", fontWeight: 600, marginBottom: "0.5rem" }}>
+                  Keyboard Shortcuts
+                </div>
 
-                <div style={{ textAlign: "center", marginBottom: "0.25rem" }}>Skip</div>
-                <div style={{ textAlign: "center", fontSize: "1.2rem" }}><kbd>↑</kbd></div>
+                <div style={styles.keyGrid}>
+                  <div />
+                  <div style={styles.keyIconBlock}>
+                    <FontAwesomeIcon icon={faSquareCaretUp} size="lg" />
+                    <div style={styles.label}>Skip</div>
+                  </div>
+                  <div />
 
-                <div style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                  fontSize: "1.2rem",
-                  marginTop: "0.25rem",
-                }}>
-                  <div style={{ textAlign: "center" }}>
-                    <div>Dislike</div>
-                    <kbd>←</kbd>
+                  <div style={styles.keyIconBlock}>
+                    <FontAwesomeIcon icon={faSquareCaretLeft} size="lg" />
+                    <div style={styles.label}>Dislike</div>
                   </div>
-                  <div style={{ textAlign: "center" }}>
-                    <kbd>↓</kbd>
-                    <div style={{ fontSize: "0.8rem" }}>Toggle</div>
-                    <div style={{ fontSize: "0.8rem" }}>Abstract</div>
+                  <div style={styles.keyIconBlock}>
+                    <FontAwesomeIcon icon={faSquareCaretDown} size="lg" />
+                    <div style={styles.label}>Abstract</div>
                   </div>
-                  <div style={{ textAlign: "center" }}>
-                    <div>Like</div>
-                    <kbd>→</kbd>
+                  <div style={styles.keyIconBlock}>
+                    <FontAwesomeIcon icon={faSquareCaretRight} size="lg" />
+                    <div style={styles.label}>Like</div>
                   </div>
                 </div>
               </div>
             )}
+
           </div>
 
       </motion.div>
@@ -351,33 +348,56 @@ const styles = {
     position: "absolute",
     bottom: "1rem",
     right: "1rem",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-end",
     zIndex: 10,
+    display: "inline-block",
   },
 
   shortcutIconButton: {
     background: "none",
     border: "none",
     cursor: "pointer",
-    fontSize: "1.25rem",
+    fontSize: "1rem",
     color: "#007bff",
     padding: 0,
   },
 
   shortcutPopup: {
-    marginTop: "0.5rem",
+    position: "absolute",
+    bottom: "2.2rem",
+    right: "0",
     background: "#fff",
     border: "1px solid #ccc",
     borderRadius: "8px",
-    padding: "0.75rem 1rem",
-    fontSize: "0.9rem",
+    padding: "0.5rem 0.75rem",
+    fontSize: "0.85rem",
     lineHeight: "1.4",
     boxShadow: "0 2px 12px rgba(0,0,0,0.15)",
-    width: "220px",
+    width: "180px",
     textAlign: "center",
-  }
+    zIndex: 1000,
+  },
+
+  keyGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(3, 1fr)",
+    gap: "0.2rem",
+    justifyItems: "center",
+    alignItems: "center",
+  },
+
+  keyIconBlock: {
+    textAlign: "center",
+    color: "#e0e0e0",
+    fontSize: "1.25rem",
+    lineHeight: 1.1,
+  },
+
+  label: {
+    fontSize: "0.65rem",
+    marginTop: "0.2rem",
+    color: "#007bff",
+  },
+
 };
 
 export default PaperCard;
