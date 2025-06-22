@@ -123,7 +123,7 @@ function PaperCard({
 
         <h2 style={styles.title}>
           <a
-            href={paper.openAccessPdf?.url || paper.url}
+            href={paper.openAccessPdf?.url || (paper.externalIds?.DOI && `https://doi.org/${paper.externalIds.DOI}`)}
             target="_blank"
             rel="noreferrer"
             style={{ color: "inherit", textDecoration: "none" }}
