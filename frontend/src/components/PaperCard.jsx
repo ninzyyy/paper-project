@@ -19,8 +19,6 @@ function formatType(type) {
 function PaperCard({
   paper,
   locked,
-  showFullAbstract,
-  setShowFullAbstract,
   onLike,
   onDislike,
   onSkip,
@@ -32,6 +30,7 @@ function PaperCard({
 }) {
 
   const [showAllAuthors, setShowAllAuthors] = useState(false);
+  const [showFullAbstract, setShowFullAbstract] = useState(false);
 
   return (
     <>
@@ -190,40 +189,47 @@ function PaperCard({
           </p>
         )}
 
-        <div
-          style={{
-            maxHeight: showFullAbstract ? "none" : "30vh",
-            overflow: "hidden",
-            position: "relative",
-            transition: "max-height 0.3s ease",
-          }}
-        >
-          <p style={{ lineHeight: 1.6 }}>
-            {paper.abstract || "No abstract available."}
+        {paper.abstract ? (
+          <div style={{ marginBottom: "1rem", fontSize: "0.95rem", lineHeight: "1.4" }}>
+            {!showFullAbstract ? (
+              <>
+                <div style={styles.abstractPreview}>
+                  <p>{paper.abstract}</p>
+                  <div style={styles.fadeOut} />
+                </div>
+                <button
+                  style={styles.readMore}
+                  onClick={() => setShowFullAbstract(true)}
+                >
+                  Read more
+                </button>
+              </>
+            ) : (
+              <>
+                <p>{paper.abstract}</p>
+                <button
+                  style={styles.readMore}
+                  onClick={() => setShowFullAbstract(false)}
+                >
+                  Read less
+                </button>
+              </>
+            )}
+          </div>
+        ) : (
+          <p style={{ marginBottom: "1rem" }}>
+            <a
+              href={paper.url}
+              target="_blank"
+              rel="noreferrer"
+              style={{ color: "#007bff" }}
+            >
+              View paper online
+            </a>
           </p>
-
-          {!showFullAbstract && paper.abstract && (
-            <div
-              style={{
-                position: "absolute",
-                bottom: 0,
-                left: 0,
-                width: "100%",
-                height: "3rem",
-                background: "linear-gradient(to bottom, transparent, #fff)",
-              }}
-            />
-          )}
-        </div>
-
-        {paper.abstract && paper.abstract.length > 300 && (
-          <button
-            onClick={() => setShowFullAbstract(!showFullAbstract)}
-            style={styles.readMore}
-          >
-            {showFullAbstract ? "Show less" : "Read more"}
-          </button>
         )}
+
+
 
         <div style={styles.buttons}>
           <button onClick={onDislike} disabled={locked}>
@@ -267,8 +273,22 @@ const styles = {
     flexWrap: "wrap",
     gap: "0.5rem",
   },
+    abstractPreview: {
+    maxHeight: "6rem",
+    overflow: "hidden",
+    position: "relative",
+    marginBottom: "0.5rem"
+  },
+  fadeOut: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    width: "100%",
+    height: "2rem",
+    background: "linear-gradient(to top, white, rgba(255,255,255,0))"
+  },
   readMore: {
-    marginTop: "0.5rem",
+    marginTop: "0rem",
     background: "none",
     border: "none",
     color: "#007bff",
