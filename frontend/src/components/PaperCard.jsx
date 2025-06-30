@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHeart, faXmark, faSquareCaretUp, faSquareCaretDown, faSquareCaretLeft, faSquareCaretRight, faQuestionCircle, faLockOpen, faArrowLeft, faArrowRight, faThumbsDown, faClock, faRotateLeft, faEllipsisH} from "@fortawesome/free-solid-svg-icons";
+import { faHeart, faXmark, faCaretDown, faSquareCaretUp, faSquareCaretDown, faSquareCaretLeft, faSquareCaretRight, faQuestionCircle, faLockOpen, faArrowLeft, faArrowRight, faThumbsDown, faClock, faRotateLeft, faEllipsisH} from "@fortawesome/free-solid-svg-icons";
 import { useState } from "react";
 
 const SWIPE_CONFIDENCE = 100;
@@ -101,25 +101,32 @@ function PaperCard({
         transition={{ duration: 0.5, ease: "easeInOut" }}
       >
 
-        {(paper.journal?.name || paper.publicationTypes?.length) && (
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            marginBottom: "0.5rem",
-            fontSize: "0.85rem",
-            color: "#888"
-          }}>
+        {(paper.journal?.name || paper.publicationTypes?.length || paper.citationCount) && (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              fontSize: "0.85rem",
+              color: "#888",
+              marginBottom: "0.5rem",
+            }}
+          >
             <span>
               {paper.publicationTypes?.length > 0 && (
-                <span>
-                  {paper.publicationTypes.map(formatType).join(", ")}
-                </span>
+                <span>{paper.publicationTypes.map(formatType).join(", ")}</span>
               )}
               {paper.publicationTypes?.length > 0 && paper.journal?.name && " | "}
               {paper.journal?.name}
             </span>
+            {paper.citationCount && (
+              <span>
+                Cited by <span style={{ color: "#555", fontWeight: "bold" }}>{paper.citationCount}</span>
+              </span>
+            )}
           </div>
         )}
+
 
         <h2 style={styles.title}>
           <a
