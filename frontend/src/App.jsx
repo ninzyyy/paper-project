@@ -8,6 +8,18 @@ import PaperCard from './components/PaperCard'
 import useKeyboardShortcuts from './hooks/useKeyboardShortcuts';
 import usePaperQueue from './hooks/usePaperQueue';
 
+function getLocalStorageSizeKB() {
+  let total = 0;
+  for (let key in localStorage) {
+    if (localStorage.hasOwnProperty(key)) {
+      const value = localStorage.getItem(key);
+      total += key.length + (value?.length || 0);
+    }
+  }
+  return (total / 1024).toFixed(1); // Size in KB
+}
+
+
 function App() {
 
   // State variables
@@ -119,29 +131,38 @@ function App() {
           )}
         </AnimatePresence>
 
-        {!loading && showHistory && restored && (
-          <div style={styles.historyContainer}>
-            <div style={styles.historyColumn}>
-              <h4 style={styles.historyHeader}>
-                <FontAwesomeIcon icon={faThumbsUp} color="#007bff"/> Liked</h4>
-              <ul style={styles.historyList}>
-                {likedPapers.map((p) => (
-                  <li key={`like-${p.paperId}`} style={styles.historyItem}>{p.title}</li>
-                ))}
-              </ul>
+          {!loading && showHistory && restored && (
+          <>
+            <div style={styles.historyContainer}>
+              <div style={styles.historyColumn}>
+                <h4 style={styles.historyHeader}>
+                  <FontAwesomeIcon icon={faThumbsUp} color="#007bff" /> Liked
+                </h4>
+                <ul style={styles.historyList}>
+                  {likedPapers.map((p) => (
+                    <li key={`like-${p.paperId}`} style={styles.historyItem}>{p.title}</li>
+                  ))}
+                </ul>
+              </div>
+              <div style={styles.historyColumn}>
+                <h4 style={styles.historyHeader}>
+                  <FontAwesomeIcon icon={faThumbsDown} color="#007bff" /> Disliked
+                </h4>
+                <ul style={styles.historyList}>
+                  {dislikedPapers.map((p) => (
+                    <li key={`dislike-${p.paperId}`} style={styles.historyItem}>{p.title}</li>
+                  ))}
+                </ul>
+              </div>
             </div>
-            <div style={styles.historyColumn}>
-              <h4 style={styles.historyHeader}>
-                <FontAwesomeIcon icon={faThumbsDown} color="#007bff"/> Disliked</h4>
-              <ul style={styles.historyList}>
-                {dislikedPapers.map((p) => (
-                  <li key={`dislike-${p.paperId}`} style={styles.historyItem}>{p.title}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        )}
 
+            {/* Local Storage Approximation */}
+            <p style={{ fontSize: "0.7rem", textAlign: "right", marginTop: "0.5rem", color: "#666" }}>
+              Storage: {getLocalStorageSizeKB()} KB
+            </p>
+
+          </>
+        )}
       </div>
     </div>
   );
