@@ -1,33 +1,79 @@
 import { useEffect, useState, useRef } from "react";
 
-
+// Main hook that manages the paper queue, history, and interactions
 export default function usePaperQueue({ setLocked, LOCK_DURATION_MS }) {
   const [paper, setPaper] = useState(null);
 
+  // Liked papers and their IDs
   const [likedPapers, setLikedPapers] = useState([]);
   const [likedIds, setLikedIds] = useState([]);
 
+  // Disliked papers and their IDs
   const [dislikedIds, setDislikedIds] = useState([]);
   const [dislikedPapers, setDislikedPapers] = useState([]);
 
+  // Skipped paper IDs
   const [skippedIds, setSkippedIds] = useState([]);
 
+  // Queues: fallback (default feed) and recommendations
   const [fallbackQueue, setFallbackQueue] = useState([]);
   const [recommendationQueue, setRecommendationQueue] = useState([]);
 
+  // Tracks how many feedback actions have been given
   const [actionCount, setActionCount] = useState(0);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Prevents duplicate actions during loading/animation delay
   const lockedRef = useRef(false);
+
+  // localStorage
+  const [restored, setRestored] = useState(false);
 
 
   useEffect(() => {
-    fetchFallbackBatch();
+    if (restored) {
+      fetchFallbackBatch();
+    }
+  }, [restored]);
+
+  // Persist state to localStorage whenever liked/disliked/skipped changes
+  useEffect(() => {
+    if (!restored) return;
+    localStorage.setItem("likedPapers", JSON.stringify(likedPapers));
+  }, [likedPapers, restored]);
+
+  useEffect(() => {
+    if (!restored) return;
+    localStorage.setItem("dislikedPapers", JSON.stringify(dislikedPapers));
+  }, [dislikedPapers, restored]);
+
+  useEffect(() => {
+    if (!restored) return;
+    localStorage.setItem("skippedIds", JSON.stringify(skippedIds));
+  }, [skippedIds, restored]);
+
+
+  // Restore session history from localStorage on first load
+  useEffect(() => {
+    const liked = JSON.parse(localStorage.getItem("likedPapers") || "[]");
+    console.log("Restoring likedPapers:", liked);
+    const disliked = JSON.parse(localStorage.getItem("dislikedPapers") || "[]");
+    console.log("Restoring dislikedPapers:", disliked);
+    const skipped = JSON.parse(localStorage.getItem("skippedIds") || "[]");
+
+    setLikedPapers(liked);
+    setDislikedPapers(disliked);
+    setSkippedIds(skipped);
+
+    setLikedIds(liked.map(p => p.paperId));
+    setDislikedIds(disliked.map(p => p.paperId));
+
+    setRestored(true);
   }, []);
 
-
+  // Returns a set of all seen paper IDs (to filter duplicates)
   function getSeenSet() {
     return new Set([
       ...likedPapers.map(p => p.paperId),
@@ -36,7 +82,7 @@ export default function usePaperQueue({ setLocked, LOCK_DURATION_MS }) {
     ]);
   }
 
-
+  // Fetches a batch of default feed papers and filters out any already seen papers
   function fetchFallbackBatch() {
     setLoading(true);
     fetch("http://127.0.0.1:8000/feed?limit=5")
@@ -55,8 +101,9 @@ export default function usePaperQueue({ setLocked, LOCK_DURATION_MS }) {
       .finally(() => setLoading(false));
   }
 
-
+  // Fetches recommendations based on liked/disliked paper IDs
   async function fetchRecommendationBatch() {
+
     const body = {
       positivePaperIds: likedIds,
       negativePaperIds: dislikedIds,
@@ -82,7 +129,7 @@ export default function usePaperQueue({ setLocked, LOCK_DURATION_MS }) {
     }
   }
 
-
+  // Locks UI interaction temporarily
   function lockForDuration() {
     setLocked(true);
     lockedRef.current = true;
@@ -92,24 +139,31 @@ export default function usePaperQueue({ setLocked, LOCK_DURATION_MS }) {
     }, LOCK_DURATION_MS);
   }
 
-
+  // Handles like/dislike actions, updates state, queues next paper
   function handleFeedback(isLiked) {
     if (lockedRef.current || !paper?.paperId) return;
 
     lockForDuration();
 
     if (isLiked) {
-      setLikedIds((prev) => [...prev, paper.paperId]);
-      setLikedPapers((prev) => [...prev, paper]);
+      setLikedIds((prev) =>
+        prev.includes(paper.paperId) ? prev : [...prev, paper.paperId]
+      );
+      setLikedPapers((prev) =>
+        prev.some(p => p.paperId === paper.paperId) ? prev : [...prev, paper]
+      );
     } else {
-      setDislikedIds((prev) => [...prev, paper.paperId]);
-      setDislikedPapers((prev) => [...prev, paper]);
+      setDislikedIds((prev) =>
+        prev.includes(paper.paperId) ? prev : [...prev, paper.paperId]
+      );
+      setDislikedPapers((prev) =>
+        prev.some(p => p.paperId === paper.paperId) ? prev : [...prev, paper]
+      );
     }
-
     advanceQueue();
   }
 
-
+  // Handles skip actions and queues next paper
   function handleSkip() {
     if (lockedRef.current || !paper?.paperId) return;
     setSkippedIds((prev) => [...prev, paper.paperId]);
@@ -117,7 +171,7 @@ export default function usePaperQueue({ setLocked, LOCK_DURATION_MS }) {
     advanceQueue();
   }
 
-
+  // Moves forward in the queue or fetches new batch if need be
   function advanceQueue() {
     setActionCount((count) => {
       const newCount = count + 1;
@@ -139,7 +193,7 @@ export default function usePaperQueue({ setLocked, LOCK_DURATION_MS }) {
     }
   }
 
-
+  // Fully resets the sesstion and localStorage
   function handleResetSession() {
     fetch("http://127.0.0.1:8000/reset-fallback", { method: "POST" })
       .then(() => {
@@ -153,10 +207,14 @@ export default function usePaperQueue({ setLocked, LOCK_DURATION_MS }) {
         setActionCount(0);
         fetchFallbackBatch();
         setSkippedIds([]);
+
+        localStorage.removeItem("likedPapers");
+        localStorage.removeItem("dislikedPapers");
+        localStorage.removeItem("skippedIds");
       });
   }
 
-
+  // Hook return API
   return {
     paper,
     likedIds,
@@ -171,5 +229,6 @@ export default function usePaperQueue({ setLocked, LOCK_DURATION_MS }) {
     handleFeedback,
     handleSkip,
     handleResetSession,
+    restored,
   };
 }

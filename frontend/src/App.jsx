@@ -11,7 +11,13 @@ import usePaperQueue from './hooks/usePaperQueue';
 function App() {
 
   // State variables
-  const[showHistory, setShowHistory] = useState(false); //History of the liked/disliked papers
+  const [showHistory, setShowHistory] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("showHistory")) || false;
+    } catch {
+      return false;
+    }
+  });
   const [showFullAbstract, setShowFullAbstract] = useState(false);
   const [locked, setLocked] = useState(false);
   const LOCK_DURATION_MS = 500;
@@ -23,6 +29,7 @@ function App() {
     likedPapers,
     dislikedIds,
     dislikedPapers,
+    restored,
     loading,
     error,
     lockedRef,
@@ -30,6 +37,15 @@ function App() {
     handleSkip,
     handleResetSession,
   } = usePaperQueue({ setLocked, LOCK_DURATION_MS });
+
+  useEffect(() => {
+    const stored = JSON.parse(localStorage.getItem("showHistory") || "false");
+    setShowHistory(stored);
+  }, [restored]);
+
+  useEffect(() => {
+    localStorage.setItem("showHistory", JSON.stringify(showHistory));
+  }, [showHistory]);
 
 
   useKeyboardShortcuts({
@@ -103,7 +119,7 @@ function App() {
           )}
         </AnimatePresence>
 
-        {!loading && showHistory && (
+        {!loading && showHistory && restored && (
           <div style={styles.historyContainer}>
             <div style={styles.historyColumn}>
               <h4 style={styles.historyHeader}>
