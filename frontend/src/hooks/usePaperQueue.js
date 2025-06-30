@@ -3,19 +3,38 @@ import { useEffect, useState, useRef } from "react";
 
 export default function usePaperQueue({ setLocked, LOCK_DURATION_MS }) {
   const [paper, setPaper] = useState(null);
+
+  const [likedPapers, setLikedPapers] = useState([]);
   const [likedIds, setLikedIds] = useState([]);
+
   const [dislikedIds, setDislikedIds] = useState([]);
+  const [dislikedPapers, setDislikedPapers] = useState([]);
+
+  const [skippedIds, setSkippedIds] = useState([]);
+
   const [fallbackQueue, setFallbackQueue] = useState([]);
   const [recommendationQueue, setRecommendationQueue] = useState([]);
+
   const [actionCount, setActionCount] = useState(0);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
   const lockedRef = useRef(false);
 
 
   useEffect(() => {
     fetchFallbackBatch();
   }, []);
+
+
+  function getSeenSet() {
+    return new Set([
+      ...likedPapers.map(p => p.paperId),
+      ...dislikedPapers.map(p => p.paperId),
+      ...skippedIds,
+    ]);
+  }
 
 
   function fetchFallbackBatch() {
@@ -26,8 +45,10 @@ export default function usePaperQueue({ setLocked, LOCK_DURATION_MS }) {
         if (data.error) {
           setError(data.error);
         } else {
-          setFallbackQueue(data);
-          setPaper(data[0]);
+          const seen = getSeenSet();
+          const filtered = data.filter(p => !seen.has(p.paperId));
+          setFallbackQueue(filtered);
+          setPaper(filtered[0]);
         }
       })
       .catch((err) => setError("Network error: " + err.message))
@@ -50,7 +71,9 @@ export default function usePaperQueue({ setLocked, LOCK_DURATION_MS }) {
 
       const papers = await response.json();
       if (Array.isArray(papers)) {
-        setRecommendationQueue(papers);
+        const seen = getSeenSet();
+        const filtered = papers.filter(p => !seen.has(p.paperId));
+        setRecommendationQueue(filtered);
       } else {
         console.warn("Unexpected format in /smart-batch:", papers);
       }
@@ -77,8 +100,10 @@ export default function usePaperQueue({ setLocked, LOCK_DURATION_MS }) {
 
     if (isLiked) {
       setLikedIds((prev) => [...prev, paper.paperId]);
+      setLikedPapers((prev) => [...prev, paper]);
     } else {
       setDislikedIds((prev) => [...prev, paper.paperId]);
+      setDislikedPapers((prev) => [...prev, paper]);
     }
 
     advanceQueue();
@@ -86,7 +111,8 @@ export default function usePaperQueue({ setLocked, LOCK_DURATION_MS }) {
 
 
   function handleSkip() {
-    if (lockedRef.current) return;
+    if (lockedRef.current || !paper?.paperId) return;
+    setSkippedIds((prev) => [...prev, paper.paperId]);
     lockForDuration();
     advanceQueue();
   }
@@ -119,11 +145,14 @@ export default function usePaperQueue({ setLocked, LOCK_DURATION_MS }) {
       .then(() => {
         setPaper(null);
         setLikedIds([]);
+        setLikedPapers([]);
         setDislikedIds([]);
+        setDislikedPapers([]);
         setFallbackQueue([]);
         setRecommendationQueue([]);
         setActionCount(0);
         fetchFallbackBatch();
+        setSkippedIds([]);
       });
   }
 
@@ -131,7 +160,9 @@ export default function usePaperQueue({ setLocked, LOCK_DURATION_MS }) {
   return {
     paper,
     likedIds,
+    likedPapers,
     dislikedIds,
+    dislikedPapers,
     fallbackQueue,
     recommendationQueue,
     loading,
