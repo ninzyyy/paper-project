@@ -4,7 +4,7 @@ A lightweight research-focused web app that allows researchers to efficiently di
 
 ## Features
 
-- Automatically build a personal feed of relevant academic literature
-- Get recommended papers that adapt and learn from your previous reading history
+- Automatically build a **personal feed** of relevant academic literature
+- Get recommended papers that **adapt and learn** from your previous reading history
 - View important data such as the title, abstract, open source url, citation count
 - Adjust and direct your feed to your area of expertise through subtopics
